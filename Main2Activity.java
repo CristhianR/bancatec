@@ -43,12 +43,20 @@ public class Main2Activity extends AppCompatActivity {
         tipoCuenta = getIntent().getStringExtra("TipoCuenta");
 
         tv1.setText("Bienvenido a BancaTec señor(a) " + nom1 + " " + ap1);
-        tv2.setText("Su número de cuenta es: " + idCuenta);
+        tv2.setText("Su número de cuenta es: " + idCuenta + "\n" + "Tipo de cuenta: " + tipoCuenta
+        +"\n" + "Saldo Actual de cuenta: " + saldo + "   " + monCuenta);
 
         cuenta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent next = new Intent(Main2Activity.this,Cuenta.class);
+                next.putExtra("Nombre1",nom1);
+                next.putExtra("Apellido1",ap1);
+                next.putExtra("Cedula",ced);
+                next.putExtra("Saldo",saldo);
+                next.putExtra("TipoCuenta",tipoCuenta);
+                next.putExtra("Coin",monCuenta);
+                next.putExtra("IDCuenta",idCuenta);
                 startActivity(next);
             }
         });

@@ -77,8 +77,9 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     Conexion get = new Conexion();
-                    //post.execute();
                     get.execute(id.getText().toString(),pw.getText().toString());
+                    //sendPost post = new sendPost();
+                    //post.execute();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -258,8 +259,7 @@ public class MainActivity extends AppCompatActivity {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             //String data = "nombre=Cristhian&segundonombre=Esteban&priapellido=Rojas&segapellido=Fuentes&telefono=84096782&direccion=Cartago&cedula=115930941&tipo=Fisico&contrasena=amon&ingreso=2000000&moneda=Colones";
-            String data = "tipo=Corriente&moneda=Colones&descripcion=Cuenta Corriente" +
-                    "&cedcliente=115930941&saldo=100000000";
+            String data = "tipo=Retiro&fecha=2017-05-25T00:00:00&monto=50000000&numcuenta=5&moneda=Colones";
             try {
                 String fileString = new String(data.getBytes(),"UTF-8");
             } catch (UnsupportedEncodingException e) {
@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 //Se especifica el URL
-                URL url = new URL("http://13.82.28.191/BancaTec/cuenta");
+                URL url = new URL("http://13.82.28.191/BancaTec/movimiento");
 
                 // se especifica el request
                 urlConnection = (HttpURLConnection) url.openConnection();
