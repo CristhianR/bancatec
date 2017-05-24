@@ -3,7 +3,9 @@ package com.example.cristhian.bancatec;
 //https://www.dotcom-tools.com/web-server-performance-test.aspx
 //http://www.hermosaprogramacion.com/2015/01/android-httpurlconnection/
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -53,8 +55,8 @@ public class MainActivity extends AppCompatActivity {
     EditText id;
     EditText pw;
     Button in;
-    TextView tv1;
-    private final String USER_AGENT = "Mozilla/5.0";
+    TextView tv1, tv2;
+    String nom, segNom, priAp, segAp, ced, tel, mon, tipo, dir, ingr, contra;
 
 
     @Override
@@ -65,7 +67,9 @@ public class MainActivity extends AppCompatActivity {
         pw = (EditText) findViewById(R.id.editText2);
         in = (Button) findViewById(R.id.button);
         tv1 = (TextView) findViewById(R.id.textView10);
-
+        tv2 = (TextView) findViewById(R.id.textView12);
+        tv2.setAlpha(0.0f);
+        final Toast msj = Toast.makeText(getApplicationContext(),"", Toast.LENGTH_SHORT);
 
         in.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     Conexion get = new Conexion();
-                    get.execute();
+                    //post.execute();
+                    get.execute(id.getText().toString(),pw.getText().toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -81,16 +86,49 @@ public class MainActivity extends AppCompatActivity {
                 //ConexionPost con = new ConexionPost();
                 //con.execute();
 
-                //Intent next = new Intent(MainActivity.this, Cuentas.class);
-                //startActivity(next);
+                if(tv2.getText().equals("OK")) {
+
+                    msj.setText("¡Cuenta correcta, ingresando al sistema!");
+                    msj.show();
+                    //tv1.setText(nom+segNom+priAp+segAp+ced+tipo+dir+tel+ingr+mon+contra);
+                    Intent next = new Intent(MainActivity.this, Cuentas.class);
+
+                    next.putExtra("Nombre1",nom);
+                    next.putExtra("Nombre2",segNom);
+                    next.putExtra("Apellido1",priAp);
+                    next.putExtra("Apellido2",segAp);
+                    next.putExtra("Cedula",ced);
+                    next.putExtra("Tipo",tipo);
+                    next.putExtra("Telefono",tel);
+                    next.putExtra("Direccion",dir);
+                    next.putExtra("Ingreso",ingr);
+                    next.putExtra("Moneda",mon);
+                    next.putExtra("Contra",contra);
+
+                    startActivity(next);
+
+                }else{
+                    if(tv2.getText().equals("0")){
+                        msj.setText("Cuenta incorrecta o inexistente.");
+                        msj.show();
+                    }else{
+                        if(tv2.getText().equals("1")){
+                            msj.setText("Contraseña incorrecta.");
+                            msj.show();
+                        }else{
+                            msj.setText("Introzuca los datos por favor.");
+                            msj.show();
+                        }
+                    }
+                }
             }
         });
     }
 
-    private class Conexion extends AsyncTask<Void, Void, String> {
-        @Override
-        protected String doInBackground(Void... params) {
+    private class Conexion extends AsyncTask<String, Void, String> {
 
+        @Override
+        protected String doInBackground(String... params) {
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -147,8 +185,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            //tv1.setText(s);
-            String busqueda = "";
+
+            String ID = "";
+            String PW = "";
 
             try {
                 InputStream is = new ByteArrayInputStream(s.getBytes());
@@ -168,22 +207,29 @@ public class MainActivity extends AppCompatActivity {
                     if (node.getNodeType() == Node.ELEMENT_NODE) {
                         Element element2 = (Element) node;
 
-                        busqueda = getValue("Nombre",element2);
-                        
+                        ID = getValue("Cedula",element2);
+                        PW = getValue("Contrasena",element2);
 
-                        if(Objects.equals(busqueda, "Cristhian")) {
-                            tv1.setText(tv1.getText() + "\nNombre: " + getValue("Nombre", element2));
-                            tv1.setText(tv1.getText() + "SegNombre: " + getValue("SegundoNombre", element2));
-                            tv1.setText(tv1.getText() + "PriApellido: " + getValue("PriApellido", element2));
-                            tv1.setText(tv1.getText() + "SegApellido: " + getValue("SegApellido", element2));
-                            tv1.setText(tv1.getText() + "Cedula: " + getValue("Cedula", element2));
-                            tv1.setText(tv1.getText() + "Tipo: " + getValue("Tipo", element2));
-                            tv1.setText(tv1.getText() + "Telefono: " + getValue("Telefono", element2));
-                            tv1.setText(tv1.getText() + "Direccion: " + getValue("Direccion", element2));
-                            tv1.setText(tv1.getText() + "Ingreso: " + getValue("Ingreso", element2));
-                            tv1.setText(tv1.getText() + "Moneda: " + getValue("Moneda", element2));
-                            tv1.setText(tv1.getText() + "Contraseña: " + getValue("Contrasena", element2));
-                            tv1.setText(tv1.getText() + "-----------------------");
+                        if(Objects.equals(ID, id.getText().toString())) {
+                            if(Objects.equals(PW, pw.getText().toString())){
+                                tv2.setText("OK");
+                                nom = getValue("Nombre",element2);
+                                segNom = getValue("SegundoNombre",element2);
+                                priAp = getValue("PriApellido",element2);
+                                segAp = getValue("SegApellido",element2);
+                                ced = getValue("Cedula",element2);
+                                tipo = getValue("Tipo",element2);
+                                tel = getValue("Telefono",element2);
+                                dir = getValue("Direccion",element2);
+                                ingr = getValue("Ingreso",element2);
+                                mon = getValue("Moneda",element2);
+                                contra = getValue("Contrasena",element2);
+                                break;
+                            }else{
+                                tv2.setText("1");
+                            }
+                        }else{
+                            tv2.setText("0");
                         }
                     }
                 }
@@ -191,7 +237,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
 
         private String getValue(String tag, Element element) {
@@ -202,7 +247,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
 //data = "Nombre=" + URLEncoder.encode("Marco", "UTF-8") +
 //                      "&Descripcion=" + URLEncoder.encode("EsoProfe", "UTF-8");
     //int responseCode = urlConnection.getResponseCode();
@@ -211,21 +255,21 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(Void... params) {
 
-
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-            String data = "nombre=Cristhian&segundonombre=Esteban&priapellido=Rojas&segapellido=Fuentes&telefono=84096782&direccion=Cartago&cedula=115930941&tipo=Fisico&contrasena=amon&ingreso=2000000&moneda=Colones";
+            //String data = "nombre=Cristhian&segundonombre=Esteban&priapellido=Rojas&segapellido=Fuentes&telefono=84096782&direccion=Cartago&cedula=115930941&tipo=Fisico&contrasena=amon&ingreso=2000000&moneda=Colones";
+            String data = "tipo=Corriente&moneda=Colones&descripcion=Cuenta Corriente" +
+                    "&cedcliente=115930941&saldo=100000000";
             try {
                 String fileString = new String(data.getBytes(),"UTF-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-
             String forecastJsonStr = null;
 
             try {
                 //Se especifica el URL
-                URL url = new URL("http://13.82.28.191/BancaTec/cliente");
+                URL url = new URL("http://13.82.28.191/BancaTec/cuenta");
 
                 // se especifica el request
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -289,25 +333,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    private String readStream(InputStream is) {
-        try {
-            ByteArrayOutputStream bo = new ByteArrayOutputStream();
-            int i = is.read();
-            while(i != -1) {
-                bo.write(i);
-                i = is.read();
-            }
-            return bo.toString();
-        } catch (IOException e) {
-            return "";
-        }
-    }
-
-
 }//cierra todo
 
 
+                                /*tv1.setText(tv1.getText() + "\nNombre: " + getValue("Nombre", element2));
+                                tv1.setText(tv1.getText() + "SegNombre: " + getValue("SegundoNombre", element2));
+                                tv1.setText(tv1.getText() + "PriApellido: " + getValue("PriApellido", element2));
+                                tv1.setText(tv1.getText() + "SegApellido: " + getValue("SegApellido", element2));
+                                tv1.setText(tv1.getText() + "Cedula: " + getValue("Cedula", element2));
+                                tv1.setText(tv1.getText() + "Tipo: " + getValue("Tipo", element2));
+                                tv1.setText(tv1.getText() + "Telefono: " + getValue("Telefono", element2));
+                                tv1.setText(tv1.getText() + "Direccion: " + getValue("Direccion", element2));
+                                tv1.setText(tv1.getText() + "Ingreso: " + getValue("Ingreso", element2));
+                                tv1.setText(tv1.getText() + "Moneda: " + getValue("Moneda", element2));
+                                tv1.setText(tv1.getText() + "Contraseña: " + getValue("Contrasena", element2));
+                                tv1.setText(tv1.getText() + "-----------------------");*/
 
 
 
