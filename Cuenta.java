@@ -31,9 +31,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class Cuenta extends AppCompatActivity {
 
     Button mov, tarAsoc, trans;
-    String nom1,ap1,ced,saldo,tipoCuenta,monCuenta,idCuenta,sec,monto,fecha,tipoTrans,res;
+    String nom1,ap1,ced,saldo,tipoCuenta,monCuenta,idCuenta,sec,monto,fecha,tipoTrans,res,salOrig,salActual,fechaExp,cs;
     List<String> transacciones = new ArrayList<String>();
-    int j = -1;
+    List<String> tarDebito = new ArrayList<String>();
     TextView tv2;
 
     @Override
@@ -87,9 +87,9 @@ public class Cuenta extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                sec = "movimiento";
-                String[] movimientos = new String[transacciones.size()];
-                movimientos = transacciones.toArray(movimientos);
+                sec = "tarjeta";
+                String[] tarjetas = new String[tarDebito.size()];
+                tarjetas = tarDebito.toArray(tarjetas);
 
                 try {
                     Conexion get = new Conexion();
@@ -98,17 +98,31 @@ public class Cuenta extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                if(tv2.getText() == "ok") {
-                    Intent next = new Intent(Cuenta.this, Movimientos.class);
+
+                if(tv2.getText() == "nice") {
+                    Intent next = new Intent(Cuenta.this, TarjetasAsociadas.class);
                     next.putExtra("Nombre1", nom1);
                     next.putExtra("Apellido1", ap1);
                     next.putExtra("Cedula", ced);
                     next.putExtra("IDCuenta", idCuenta);
-                    Log.d("RES:", movimientos[0]);
-                    next.putExtra("Movimientos", movimientos);
+                    next.putExtra("Tarjetas", tarjetas);
                     startActivity(next);
                 }
 
+            }
+        });
+
+        trans.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent next = new Intent(Cuenta.this, Transacciones.class);
+
+                next.putExtra("Cedula", ced);
+                next.putExtra("IDCuenta", idCuenta);
+                next.putExtra("Saldo", saldo);
+                next.putExtra("Moneda", monCuenta);
+                next.putExtra("TipoCuenta", tipoCuenta);
+                startActivity(next);
             }
         });
     }
@@ -126,6 +140,7 @@ public class Cuenta extends AppCompatActivity {
             try {
                 //Se especifica el URL
 
+                Log.d("URL",sec);
                 URL url = new URL("http://13.82.28.191/BancaTec/" + sec);
 
                 // se especifica el request
@@ -188,31 +203,67 @@ public class Cuenta extends AppCompatActivity {
                 Element element = doc.getDocumentElement();
                 element.normalize();
 
-                Log.d("OOKKK", "ok");
-                NodeList nList = doc.getElementsByTagName("Movimiento");
+                if(Objects.equals(sec, "movimiento")) {
 
-                for (int i = 0; i < nList.getLength(); i++) {
+                    NodeList nList = doc.getElementsByTagName("Movimiento");
 
-                    Node node = nList.item(i);
-                    if (node.getNodeType() == Node.ELEMENT_NODE) {
-                        Element element2 = (Element) node;
+                    for (int i = 0; i < nList.getLength(); i++) {
 
-                        ID = getValue("NumCuenta",element2);
+                        Node node = nList.item(i);
+                        if (node.getNodeType() == Node.ELEMENT_NODE) {
+                            Element element2 = (Element) node;
 
-                        if(Objects.equals(ID, idCuenta)) {
+                            ID = getValue("NumCuenta", element2);
 
-                            tv2.setText("ok");
-                            j += 1;
-                            tipoTrans = getValue("Tipo", element2);
-                            fecha = getValue("Fecha", element2);
-                            monto = getValue("Monto", element2);
-                            res = "Transacción: " + tipoTrans + "\n" +
-                                    "Fecha: " + fecha + "\n" +
-                                    "Monto: " + monto;
-                            transacciones.add(res);
-                            res = "";
+                            if (Objects.equals(ID, idCuenta)) {
+
+                                tv2.setText("ok");
+                                tipoTrans = getValue("Tipo", element2);
+                                fecha = getValue("Fecha", element2);
+                                monto = getValue("Monto", element2);
+                                res = "Transacción: " + tipoTrans + "\n" +
+                                        "Fecha: " + fecha + "\n" +
+                                        "Monto: " + monto;
+                                transacciones.add(res);
+                                res = "";
+                            }
                         }
                     }
+                }else{
+                    Log.d("Ok","ok");
+                    if(Objects.equals(sec, "tarjeta")){
+
+                        NodeList nList = doc.getElementsByTagName("Tarjeta");
+
+                        for (int i = 0; i < nList.getLength(); i++) {
+
+                            Node node = nList.item(i);
+                            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                                Element element2 = (Element) node;
+
+                                ID = getValue("NumCuenta", element2);
+                                tipoCuenta = getValue("Tipo", element2);
+
+                                if (Objects.equals(ID, idCuenta)) {
+                                    if (Objects.equals(tipoCuenta, "Debito")) {
+                                        tv2.setText("nice");
+
+                                        fechaExp = getValue("FechaExp", element2);
+                                        cs = getValue("CodigoSeg", element2);
+                                        salActual = getValue("SaldoActual", element2);
+                                        salOrig = getValue("SaldoOrig", element2);
+                                        res = "Código de Seguridad: " + cs + "\n" +
+                                                "FechaExp: " + fechaExp + "\n" +
+                                                "Saldo Original: " + salOrig + "\n" +
+                                                "Saldo Actual: " + salActual;
+                                        tarDebito.add(res);
+                                        res = "";
+                                    }
+                                }
+                            }
+                        }
+
+                    } //aca lo otro!
                 }
 
             } catch (Exception e) {

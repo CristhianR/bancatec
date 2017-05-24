@@ -15,7 +15,7 @@ import java.util.Objects;
 public class Movimientos extends AppCompatActivity {
 
     TextView tv1;
-    String nom1,ap1,ced,idCuenta,monto,fecha,tipoTrans;
+    String nom1,ap1,ced,idCuenta;
     ListView list;
     String[] movimientos;
 

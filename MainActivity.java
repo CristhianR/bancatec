@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             //String data = "nombre=Cristhian&segundonombre=Esteban&priapellido=Rojas&segapellido=Fuentes&telefono=84096782&direccion=Cartago&cedula=115930941&tipo=Fisico&contrasena=amon&ingreso=2000000&moneda=Colones";
-            String data = "tipo=Retiro&fecha=2017-05-25T00:00:00&monto=50000000&numcuenta=5&moneda=Colones";
+            String data ="codigoseg=100&fechaexp=2025-10-10T00:00:00&tipo=Debito&numcuenta=5&saldoorig=500000000";
             try {
                 String fileString = new String(data.getBytes(),"UTF-8");
             } catch (UnsupportedEncodingException e) {
@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 //Se especifica el URL
-                URL url = new URL("http://13.82.28.191/BancaTec/movimiento");
+                URL url = new URL("http://13.82.28.191/BancaTec/tarjeta");
 
                 // se especifica el request
                 urlConnection = (HttpURLConnection) url.openConnection();
