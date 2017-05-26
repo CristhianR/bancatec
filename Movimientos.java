@@ -50,6 +50,9 @@ public class Movimientos extends AppCompatActivity {
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
                 // TODO Auto-generated method stub
                 Toast.makeText(getApplicationContext(), "Ha pulsado el item " + position, Toast.LENGTH_SHORT).show();
+                Intent next = new Intent(Movimientos.this,prueba.class);
+                next.putExtra("ID",movimientos[position]);
+                startActivity(next);
 
             }
 

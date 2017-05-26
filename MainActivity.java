@@ -76,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 try {
-                    Conexion get = new Conexion();
-                    get.execute(id.getText().toString(),pw.getText().toString());
-                    //sendPost post = new sendPost();
-                    //post.execute();
+                    //Conexion get = new Conexion();
+                    //get.execute(id.getText().toString(),pw.getText().toString());
+                    sendPost post = new sendPost();
+                    post.execute();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 //Se especifica el URL
-                URL url = new URL("http://13.82.28.191/BancaTec/cliente");
+                URL url = new URL("http://40.71.191.83/BancaTec/cliente");
 
                 // se especifica el request
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             //String data = "nombre=Cristhian&segundonombre=Esteban&priapellido=Rojas&segapellido=Fuentes&telefono=84096782&direccion=Cartago&cedula=115930941&tipo=Fisico&contrasena=amon&ingreso=2000000&moneda=Colones";
-            String data ="codigoseg=100&fechaexp=2025-10-10T00:00:00&tipo=Debito&numcuenta=5&saldoorig=500000000";
+            String data ="interes=1&saldo=1000000000&cedcliente=115930941&cedacesor=0&moneda=Colones";;
             try {
                 String fileString = new String(data.getBytes(),"UTF-8");
             } catch (UnsupportedEncodingException e) {
@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 //Se especifica el URL
-                URL url = new URL("http://13.82.28.191/BancaTec/tarjeta");
+                URL url = new URL("http://40.71.191.83/BancaTec/compra");
 
                 // se especifica el request
                 urlConnection = (HttpURLConnection) url.openConnection();

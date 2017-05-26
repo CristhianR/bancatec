@@ -116,7 +116,7 @@ public class Cuentas extends AppCompatActivity {
 
             try {
                 //Se especifica el URL
-                URL url = new URL("http://13.82.28.191/BancaTec/cuenta");
+                URL url = new URL("http://40.71.191.83/BancaTec/cuenta");
 
                 // se especifica el request
                 urlConnection = (HttpURLConnection) url.openConnection();

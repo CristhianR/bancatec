@@ -5,9 +5,11 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,7 +33,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class Cuenta extends AppCompatActivity {
 
     Button mov, tarAsoc, trans;
-    String nom1,ap1,ced,saldo,tipoCuenta,monCuenta,idCuenta,sec,monto,fecha,tipoTrans,res,salOrig,salActual,fechaExp,cs;
+    String nom1,ap1,ced,saldo,tipoCuenta,monCuenta,sec,monto,fecha,tipoTrans,res,salOrig,salActual,fechaExp,cs,sec2,idCuenta;
     List<String> transacciones = new ArrayList<String>();
     List<String> tarDebito = new ArrayList<String>();
     TextView tv2;
@@ -55,6 +57,7 @@ public class Cuenta extends AppCompatActivity {
         idCuenta = getIntent().getStringExtra("IDCuenta");
         tipoCuenta = getIntent().getStringExtra("TipoCuenta");
 
+
         mov.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -63,12 +66,13 @@ public class Cuenta extends AppCompatActivity {
                 String[] movimientos = new String[transacciones.size()];
                 movimientos = transacciones.toArray(movimientos);
 
-                try {
-                    Conexion get = new Conexion();
-                    get.execute();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                Conexion get = new Conexion();
+                get.execute();
+
+                sec2 = "transferencia?cuenta=" + idCuenta;
+                Conexion2 get2 = new Conexion2();
+                get2.execute();
+
 
                 if(tv2.getText() == "ok") {
                     Intent next = new Intent(Cuenta.this, Movimientos.class);
@@ -77,7 +81,11 @@ public class Cuenta extends AppCompatActivity {
                     next.putExtra("Cedula", ced);
                     next.putExtra("IDCuenta", idCuenta);
                     next.putExtra("Movimientos", movimientos);
+                    transacciones.removeAll(transacciones);
+                    //Log.d("ESTA: ", transacciones.size() +"");
                     startActivity(next);
+                }else{
+                    transacciones.removeAll(transacciones);
                 }
 
             }
@@ -106,7 +114,10 @@ public class Cuenta extends AppCompatActivity {
                     next.putExtra("Cedula", ced);
                     next.putExtra("IDCuenta", idCuenta);
                     next.putExtra("Tarjetas", tarjetas);
+                    tarDebito.removeAll(tarDebito);
                     startActivity(next);
+                }else{
+                    tarDebito.removeAll(tarDebito);
                 }
 
             }
@@ -132,6 +143,7 @@ public class Cuenta extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
 
+
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
@@ -141,7 +153,7 @@ public class Cuenta extends AppCompatActivity {
                 //Se especifica el URL
 
                 Log.d("URL",sec);
-                URL url = new URL("http://13.82.28.191/BancaTec/" + sec);
+                URL url = new URL("http://40.71.191.83/BancaTec/" + sec);
 
                 // se especifica el request
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -263,7 +275,37 @@ public class Cuenta extends AppCompatActivity {
                             }
                         }
 
-                    } //aca lo otro!
+                    }else{
+                        NodeList nList = doc.getElementsByTagName("Transferencia");
+
+                        for (int i = 0; i < nList.getLength(); i++) {
+
+                            Node node = nList.item(i);
+                            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                                Element element2 = (Element) node;
+
+                                tv2.setText("ok");
+                                tipoTrans = getValue("CuentaEmisora", element2);
+                                fecha = getValue("Fecha", element2);
+                                monto = getValue("Monto", element2);
+
+                                if(tipoTrans.equals(idCuenta)) {
+                                    res = "Transacción: Crédito" + "\n" +
+                                            "Fecha: " + fecha + "\n" +
+                                            "Monto: " + monto;
+                                    transacciones.add(res);
+                                    res = "";
+                                }else{
+                                    res = "Transacción: Débito" + "\n" +
+                                            "Fecha: " + fecha + "\n" +
+                                            "Monto: " + monto;
+                                    transacciones.add(res);
+                                    res = "";
+                                }
+                            }
+                        }
+
+                    }
                 }
 
             } catch (Exception e) {
@@ -278,4 +320,121 @@ public class Cuenta extends AppCompatActivity {
         }
 
     }
+
+    private class Conexion2 extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            String forecastJsonStr = null;
+
+            try {
+                //Se especifica el URL
+
+                Log.d("URL",sec2);
+                URL url = new URL("http://40.71.191.83/BancaTec/" + sec2);
+
+                // se especifica el request
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+
+                    return null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+
+                    return null;
+                }
+                forecastJsonStr = buffer.toString();
+                return forecastJsonStr;
+            } catch (IOException e) {
+
+                return null;
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("PlaceholderFragment", "Error closing stream", e);
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            String ID = "";
+            String PW = "";
+
+            try {
+                InputStream is = new ByteArrayInputStream(s.getBytes());
+
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                Document doc = dBuilder.parse(is);
+
+                Element element = doc.getDocumentElement();
+                element.normalize();
+
+                NodeList nList = doc.getElementsByTagName("Transferencia");
+
+                for (int i = 0; i < nList.getLength(); i++) {
+
+                    Node node = nList.item(i);
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        Element element2 = (Element) node;
+
+                        tv2.setText("ok");
+                        tipoTrans = getValue("CuentaEmisora", element2);
+                        fecha = getValue("Fecha", element2);
+                        monto = getValue("Monto", element2);
+
+                        if(tipoTrans.equals(idCuenta)) {
+                            res = "Transacción: Crédito" + "\n" +
+                                    "Fecha: " + fecha + "\n" +
+                                    "Monto: " + monto;
+                            transacciones.add(res);
+                            res = "";
+                        }else{
+                            res = "Transacción: Débito" + "\n" +
+                                    "Fecha: " + fecha + "\n" +
+                                    "Monto: " + monto;
+                            transacciones.add(res);
+                            res = "";
+                            }
+                        }
+                    }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        private String getValue(String tag, Element element) {
+            NodeList nodeList = element.getElementsByTagName(tag).item(0).getChildNodes();
+            Node node = nodeList.item(0);
+            return node.getNodeValue();
+        }
+    }
+
 }
