@@ -9,10 +9,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/*
+Este activity presenta el listView de las compras realizadas con una tarjeta de crédito en específico.
+ */
 public class Listado extends AppCompatActivity {
 
     TextView tv1;
-    String nom1,ap1,ced,idtar,idCuenta;
+    String nom1,ap1,ced,idtar,idCuenta,monCuenta,tipoCuenta,saldo;
     ListView list;
     String[] compras,tarCredito,ids;
 
@@ -23,6 +26,7 @@ public class Listado extends AppCompatActivity {
         tv1 = (TextView) findViewById(R.id.textView20);
         list = (ListView)findViewById(R.id.listview4);
         nom1 = getIntent().getStringExtra("Nombre1");
+        saldo = getIntent().getStringExtra("Saldo");
         ap1 = getIntent().getStringExtra("Apellido1");
         ced = getIntent().getStringExtra("Cedula");
         idtar = getIntent().getStringExtra("IDTarjeta");
@@ -30,6 +34,8 @@ public class Listado extends AppCompatActivity {
         idCuenta = getIntent().getStringExtra("IDCuenta");
         tarCredito = getIntent().getStringArrayExtra("Tarjetas");
         ids = getIntent().getStringArrayExtra("IDTar");
+        monCuenta = getIntent().getStringExtra("Coin");
+        tipoCuenta = getIntent().getStringExtra("TipoCuenta");
 
         ArrayAdapter<String> adaptador = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, compras);
 
@@ -53,10 +59,13 @@ public class Listado extends AppCompatActivity {
             next.putExtra("Nombre1", nom1);
             next.putExtra("Apellido1", ap1);
             next.putExtra("Cedula", ced);
-            next.putExtra("ID", idtar);
-            next.putExtra("Tarjetas",tarCredito);
-            next.putExtra("IDTar",ids);
-            next.putExtra("IDCuenta",idCuenta);
+            next.putExtra("Saldo", saldo);
+            next.putExtra("Coin", monCuenta);
+            next.putExtra("TipoCuenta", tipoCuenta);
+            next.putExtra("IDtarjeta", idtar);
+            next.putExtra("Tarjetas", tarCredito);
+            next.putExtra("IDTar", ids);
+            next.putExtra("IDCuenta", idCuenta);
             startActivity(next);
             return true;
         }

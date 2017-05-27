@@ -33,11 +33,14 @@ import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
+/*
+Este activity permite realizar el pago de la tarjeta de crédito consultada atravéz del listView, además permite crear
+otro activity para ver el listado de compras realizado con esa tarjeta.
+ */
 public class Tarjeta extends AppCompatActivity {
 
     TextView tv1;
-    String info,id,m,saldo,com,mon,fecha,res,nom1,ap1,ced,idCuenta,fi,ff;
+    String info,id,m,saldo,com,mon,fecha,res,nom1,ap1,ced,idCuenta,fi,ff,monCuenta,tipoCuenta;
     String [] tarCredito,ids;
     Button pago,lista;
     EditText monto,f1,f2;
@@ -62,6 +65,9 @@ public class Tarjeta extends AppCompatActivity {
         idCuenta = getIntent().getStringExtra("IDCuenta");
         tarCredito = getIntent().getStringArrayExtra("Tarjetas");
         ids = getIntent().getStringArrayExtra("IDTar");
+        monCuenta = getIntent().getStringExtra("Coin");
+        tipoCuenta = getIntent().getStringExtra("TipoCuenta");
+
         fi = f1.getText().toString();
         ff = f2.getText().toString();
 
@@ -73,10 +79,8 @@ public class Tarjeta extends AppCompatActivity {
         pago.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 m = monto.getText().toString();
-
-                Log.d("ESTO ES M: ", m);
-
                 if(m.length() > 0) {
                     sal = Integer.parseInt(saldo);
                     n = Integer.parseInt(m);
@@ -122,6 +126,10 @@ public class Tarjeta extends AppCompatActivity {
                     next.putExtra("Tarjetas",tarCredito);
                     next.putExtra("IDTar",ids);
                     next.putExtra("IDCuenta",idCuenta);
+                    next.putExtra("Coin", monCuenta);
+                    next.putExtra("TipoCuenta", tipoCuenta);
+                    next.putExtra("Tarjetas",tarCredito);
+                    next.putExtra("IDtar",ids);
                     compras.removeAll(compras);
                     startActivity(next);
                 }else{
@@ -338,10 +346,12 @@ public class Tarjeta extends AppCompatActivity {
             next.putExtra("Nombre1", nom1);
             next.putExtra("Apellido1", ap1);
             next.putExtra("Cedula", ced);
-            next.putExtra("Tarjetas",tarCredito);
-            next.putExtra("IDTar",ids);
-            next.putExtra("IDCuenta",idCuenta);
-            next.putExtra("Saldo",saldo);
+            next.putExtra("Saldo", saldo);
+            next.putExtra("Coin", monCuenta);
+            next.putExtra("TipoCuenta", tipoCuenta);
+            next.putExtra("IDCuenta", idCuenta);
+            next.putExtra("Tarjetas", tarCredito);
+            next.putExtra("IDTar", ids);
             startActivity(next);
             return true;
         }

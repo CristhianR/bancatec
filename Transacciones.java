@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,10 +30,13 @@ import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
+/*
+Este activity se encarga de realizar las tranferencias de una cuenta a otra. Este es el primer activity que realiza un
+POST al server.
+ */
 public class Transacciones extends AppCompatActivity {
 
-    String ced,monCuenta,idCuenta,tipoCuenta,saldo,res,montoDeb,cuenta;
+    String ced,monCuenta,idCuenta,tipoCuenta,saldo,res,montoDeb,cuenta,ap1,nom1;
     EditText cuentaDeb,monto;
     Button trans;
     int cd,sal;
@@ -44,6 +48,8 @@ public class Transacciones extends AppCompatActivity {
         cuentaDeb = (EditText) findViewById(R.id.editText3);
         monto = (EditText) findViewById(R.id.editText7);
         trans = (Button) findViewById(R.id.button13);
+        nom1 = getIntent().getStringExtra("Nombre1");
+        ap1 = getIntent().getStringExtra("Apellido1");
         ced = getIntent().getStringExtra("Cedula");
         saldo = getIntent().getStringExtra("Saldo");
         monCuenta = getIntent().getStringExtra("Moneda");
@@ -187,6 +193,9 @@ public class Transacciones extends AppCompatActivity {
 
     }
 
+    /*
+    Similar a a clase del GET, realiza la conexión atravéz del URL y envía la data necesaria para el POST.
+     */
     private class sendPost extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... params) {
@@ -206,8 +215,6 @@ public class Transacciones extends AppCompatActivity {
             try {
                 //Se especifica el URL
                 URL url = new URL("http://40.71.191.83/BancaTec/transferencia?cuenta=" + idCuenta);
-                Log.d("Body: ",data);
-                Log.d("URL: ",url.toString());
 
                 // se especifica el request
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -269,5 +276,22 @@ public class Transacciones extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
         }
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Intent next = new Intent(Transacciones.this, Cuenta.class);
+            next.putExtra("Nombre1", nom1);
+            next.putExtra("Apellido1", ap1);
+            next.putExtra("Cedula", ced);
+            next.putExtra("Saldo", saldo);
+            next.putExtra("Coin", monCuenta);
+            next.putExtra("TipoCuenta", tipoCuenta);
+            next.putExtra("IDCuenta", idCuenta);
+            startActivity(next);
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 }

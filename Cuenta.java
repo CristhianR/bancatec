@@ -9,13 +9,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -26,14 +23,18 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+/*
+Este activity es similar al anterior, en este caso la lista de datos que obtiene es la de movimientos y tarjetas de
+débito, las cuales son  pasadas al siguiente acivity(Movimientos, TarjetasAsociadas) para presentarlos como un listView.
+ */
 public class Cuenta extends AppCompatActivity {
 
     Button mov, tarAsoc, trans;
     String nom1,ap1,ced,saldo,tipoCuenta,monCuenta,sec,monto,fecha,tipoTrans,res,salOrig,salActual,fechaExp,cs,sec2,idCuenta;
+    String est, est2 = "";
     List<String> transacciones = new ArrayList<String>();
     List<String> tarDebito = new ArrayList<String>();
     TextView tv2;
@@ -57,6 +58,10 @@ public class Cuenta extends AppCompatActivity {
         idCuenta = getIntent().getStringExtra("IDCuenta");
         tipoCuenta = getIntent().getStringExtra("TipoCuenta");
 
+        est = "";
+        est2 = "";
+        transacciones.removeAll(transacciones);
+
 
         mov.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,15 +79,17 @@ public class Cuenta extends AppCompatActivity {
                 get2.execute();
 
 
-                if(tv2.getText() == "ok") {
+                if(est.equals("ok") && est2.equals("ok")) {
                     Intent next = new Intent(Cuenta.this, Movimientos.class);
                     next.putExtra("Nombre1", nom1);
                     next.putExtra("Apellido1", ap1);
                     next.putExtra("Cedula", ced);
                     next.putExtra("IDCuenta", idCuenta);
+                    next.putExtra("Saldo", saldo);
+                    next.putExtra("Coin", monCuenta);
+                    next.putExtra("TipoCuenta", tipoCuenta);
                     next.putExtra("Movimientos", movimientos);
                     transacciones.removeAll(transacciones);
-                    //Log.d("ESTA: ", transacciones.size() +"");
                     startActivity(next);
                 }else{
                     transacciones.removeAll(transacciones);
@@ -107,13 +114,16 @@ public class Cuenta extends AppCompatActivity {
                 }
 
 
-                if(tv2.getText() == "nice") {
+                if(Objects.equals(est, "nice")) {
                     Intent next = new Intent(Cuenta.this, TarjetasAsociadas.class);
                     next.putExtra("Nombre1", nom1);
                     next.putExtra("Apellido1", ap1);
                     next.putExtra("Cedula", ced);
                     next.putExtra("IDCuenta", idCuenta);
                     next.putExtra("Tarjetas", tarjetas);
+                    next.putExtra("Saldo", saldo);
+                    next.putExtra("Coin", monCuenta);
+                    next.putExtra("TipoCuenta", tipoCuenta);
                     tarDebito.removeAll(tarDebito);
                     startActivity(next);
                 }else{
@@ -127,12 +137,15 @@ public class Cuenta extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent next = new Intent(Cuenta.this, Transacciones.class);
-
                 next.putExtra("Cedula", ced);
+                next.putExtra("Nombre1", nom1);
+                next.putExtra("Apellido1", ap1);
                 next.putExtra("IDCuenta", idCuenta);
                 next.putExtra("Saldo", saldo);
                 next.putExtra("Moneda", monCuenta);
                 next.putExtra("TipoCuenta", tipoCuenta);
+                next.putExtra("Saldo", saldo);
+                next.putExtra("Coin", monCuenta);
                 startActivity(next);
             }
         });
@@ -143,23 +156,18 @@ public class Cuenta extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
 
-
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-
             String forecastJsonStr = null;
 
             try {
                 //Se especifica el URL
-
-                Log.d("URL",sec);
                 URL url = new URL("http://40.71.191.83/BancaTec/" + sec);
 
                 // se especifica el request
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
-
 
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
@@ -229,7 +237,7 @@ public class Cuenta extends AppCompatActivity {
 
                             if (Objects.equals(ID, idCuenta)) {
 
-                                tv2.setText("ok");
+                                est = "ok";
                                 tipoTrans = getValue("Tipo", element2);
                                 fecha = getValue("Fecha", element2);
                                 monto = getValue("Monto", element2);
@@ -242,7 +250,6 @@ public class Cuenta extends AppCompatActivity {
                         }
                     }
                 }else{
-                    Log.d("Ok","ok");
                     if(Objects.equals(sec, "tarjeta")){
 
                         NodeList nList = doc.getElementsByTagName("Tarjeta");
@@ -258,7 +265,7 @@ public class Cuenta extends AppCompatActivity {
 
                                 if (Objects.equals(ID, idCuenta)) {
                                     if (Objects.equals(tipoCuenta, "Debito")) {
-                                        tv2.setText("nice");
+                                        est = "nice";
 
                                         fechaExp = getValue("FechaExp", element2);
                                         cs = getValue("CodigoSeg", element2);
@@ -284,7 +291,7 @@ public class Cuenta extends AppCompatActivity {
                             if (node.getNodeType() == Node.ELEMENT_NODE) {
                                 Element element2 = (Element) node;
 
-                                tv2.setText("ok");
+                                est = "ok";
                                 tipoTrans = getValue("CuentaEmisora", element2);
                                 fecha = getValue("Fecha", element2);
                                 monto = getValue("Monto", element2);
@@ -328,20 +335,16 @@ public class Cuenta extends AppCompatActivity {
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-
             String forecastJsonStr = null;
 
             try {
                 //Se especifica el URL
-
-                Log.d("URL",sec2);
                 URL url = new URL("http://40.71.191.83/BancaTec/" + sec2);
 
                 // se especifica el request
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
-
 
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
@@ -405,7 +408,7 @@ public class Cuenta extends AppCompatActivity {
                     if (node.getNodeType() == Node.ELEMENT_NODE) {
                         Element element2 = (Element) node;
 
-                        tv2.setText("ok");
+                       est2 = "ok";
                         tipoTrans = getValue("CuentaEmisora", element2);
                         fecha = getValue("Fecha", element2);
                         monto = getValue("Monto", element2);
@@ -435,6 +438,23 @@ public class Cuenta extends AppCompatActivity {
             Node node = nodeList.item(0);
             return node.getNodeValue();
         }
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Intent next = new Intent(Cuenta.this, Main2Activity.class);
+            next.putExtra("Nombre1", nom1);
+            next.putExtra("Apellido1", ap1);
+            next.putExtra("Cedula", ced);
+            next.putExtra("Saldo", saldo);
+            next.putExtra("Coin", monCuenta);
+            next.putExtra("TipoCuenta", tipoCuenta);
+            next.putExtra("IDCuenta", idCuenta);
+            startActivity(next);
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 
 }

@@ -29,6 +29,11 @@ import java.util.Objects;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+/*
+Este activity se encarga de obtener distintos datos, según lo que el cliente desee realizar, como obtener listas de
+datos como transacciones y tarjetas asociadas todas a la cuenta que esta siendo consultada, valida la entrada
+si esta es correcta pasa al siguiente activity, pasando todos los parámetros(datos) a utilizar.
+ */
 public class Main2Activity extends AppCompatActivity {
 
     Button cuenta;
@@ -37,11 +42,14 @@ public class Main2Activity extends AppCompatActivity {
     String nom1,inte,ap1,ced,cedA,monPres,saldo,tipoCuenta,monCuenta,idCuenta,secc,
             salOrig,salActual,fechaExp,cs,res,idTar,idPres;
     String r = "";
-    TextView tv1, tv2;
+    TextView tv1,tv2;
+
+    //Lista a utilizar para guardar datos del XML, esto servirá para realizar el ListView en la siguiente activity.
     List<String> tarCredito = new ArrayList<String>();
     List<String> idtarCredito = new ArrayList<String>();
     List<String> listpres = new ArrayList<String>();
     List<String> idlistpres = new ArrayList<String>();
+    List<String> listmonpres = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,16 +62,8 @@ public class Main2Activity extends AppCompatActivity {
         tv2 = (TextView) findViewById(R.id.textView8);
 
         nom1 = getIntent().getStringExtra("Nombre1");
-        //nom2 = getIntent().getStringExtra("Nombre2");
         ap1 = getIntent().getStringExtra("Apellido1");
-        //ap2 = getIntent().getStringExtra("Apellido2");
         ced = getIntent().getStringExtra("Cedula");
-        //tipo = getIntent().getStringExtra("Tipo");
-        //tel = getIntent().getStringExtra("Telefono");
-        //dir = getIntent().getStringExtra("Direccion");
-        //ing = getIntent().getStringExtra("Ingreso");
-        //monIngreso = getIntent().getStringExtra("Moneda");
-        //con = getIntent().getStringExtra("Contra");
         saldo = getIntent().getStringExtra("Saldo");
         monCuenta = getIntent().getStringExtra("Coin");
         idCuenta = getIntent().getStringExtra("IDCuenta");
@@ -97,12 +97,8 @@ public class Main2Activity extends AppCompatActivity {
                 String[] IDS = new String[idtarCredito.size()];
                 IDS = idtarCredito.toArray(IDS);
 
-                try {
-                    Conexion get = new Conexion();
-                    get.execute();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                Conexion get = new Conexion();
+                get.execute();
 
                 if(r.equals(("nice"))) {
                     r="";
@@ -114,6 +110,8 @@ public class Main2Activity extends AppCompatActivity {
                     next.putExtra("Tarjetas", tarjetas);
                     next.putExtra("IDTar", IDS);
                     next.putExtra("Saldo", saldo);
+                    next.putExtra("TipoCuenta",tipoCuenta);
+                    next.putExtra("Coin",monCuenta);
                     tarCredito.removeAll(tarCredito);
                     idtarCredito.removeAll(idtarCredito);
                     secc="";
@@ -132,11 +130,13 @@ public class Main2Activity extends AppCompatActivity {
             pres = listpres.toArray(pres);
             String[] idspres = new String[idlistpres.size()];
             idspres = idlistpres.toArray(idspres);
+            String[] arraymonpres = new String[listmonpres.size()];
+            arraymonpres = listmonpres.toArray(arraymonpres);
 
             Conexion get = new Conexion();
             get.execute();
 
-            if(r.equals(("nice"))) {
+            if(r.equals(("good"))) {
                 r = "";
                 Intent next = new Intent(Main2Activity.this, Prestamos.class);
                 next.putExtra("Nombre1", nom1);
@@ -147,9 +147,11 @@ public class Main2Activity extends AppCompatActivity {
                 next.putExtra("Coin", monCuenta);
                 next.putExtra("IDCuenta", idCuenta);
                 next.putExtra("Prestamos", pres);
-                next.putExtra("IDSPres", idspres);
+                next.putExtra("IDPres", idspres);
+                next.putExtra("MonPres2", arraymonpres);
                 listpres.removeAll(listpres);
                 idlistpres.removeAll(idlistpres);
+                listmonpres.removeAll(idlistpres);
                 secc = "";
                 startActivity(next);
             }
@@ -246,7 +248,6 @@ public class Main2Activity extends AppCompatActivity {
                         if (Objects.equals(ID, idCuenta)) {
                             if (Objects.equals(tipoCuenta, "Credito")) {
                                 r = "nice";
-
                                 fechaExp = getValue("FechaExp", element2);
                                 cs = getValue("CodigoSeg", element2);
                                 salActual = getValue("SaldoActual", element2);
@@ -276,11 +277,9 @@ public class Main2Activity extends AppCompatActivity {
                                 Element element2 = (Element) node;
 
                                 ID = getValue("CedCliente", element2);
-                                tipoCuenta = getValue("Tipo", element2);
 
                                 if (Objects.equals(ID, ced)) {
-
-
+                                    r = "good";
                                     inte = getValue("Interes", element2);
                                     cedA = getValue("CedAsesor", element2);
                                     salActual = getValue("SaldoActual", element2);
@@ -293,8 +292,10 @@ public class Main2Activity extends AppCompatActivity {
                                             "Saldo Actual: " + salActual + "\n" +
                                             "Cédula de Acesor:" + cedA;
 
-                                    listpres.add(res);
+                                    listpres.add(res); //se agrega a la lista el body anterior para la obtención de datos del listView.
+                                    //Las demás son para guardar datos específicos.
                                     idlistpres.add(idPres);
+                                    listmonpres.add(monPres);
                                     res = "";
 
                                 }
@@ -317,15 +318,17 @@ public class Main2Activity extends AppCompatActivity {
 
     }
 
-
-    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             Intent next = new Intent(Main2Activity.this, Cuentas.class);
+            next.putExtra("Nombre1", nom1);
+            next.putExtra("Apellido1", ap1);
+            next.putExtra("Cedula", ced);
             startActivity(next);
             return true;
         }
 
         return super.onKeyDown(keyCode, event);
     }
+
 }

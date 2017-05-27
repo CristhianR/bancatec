@@ -30,12 +30,17 @@ import java.util.Objects;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+/*
+Este activity se encarga de obtener el ID de la cuenta que introduce el cliente, valida la entrada
+si esta es correcta pasa al siguiente activity, pasando todos los parámetros(datos) a utilizar.
+ */
 public class Cuentas extends AppCompatActivity {
 
     Button cuentas;
-    TextView tv1, tv2;
+    TextView tv1;
     EditText numCuenta;
-    String nom1,nom2,ap1,ap2,ced,tipo,tel,dir,ing,monIngreso,con,saldo,tipoCuenta,monCuenta,idCuenta;
+    String nom1,ap1,ced,saldo,tipoCuenta,monCuenta,idCuenta;
+    String est = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,20 +49,12 @@ public class Cuentas extends AppCompatActivity {
         cuentas = (Button) findViewById(R.id.button5);
         tv1 = (TextView) findViewById(R.id.textView6);
         numCuenta = (EditText) findViewById(R.id.editText5);
-        tv2 = (TextView) findViewById(R.id.textView11);
-        tv2.setAlpha(0.0f);
 
+
+        //Valores de interés instanciados, estos son valores enviados desde otro activity.
         nom1 = getIntent().getStringExtra("Nombre1");
-        nom2 = getIntent().getStringExtra("Nombre2");
         ap1 = getIntent().getStringExtra("Apellido1");
-        ap2 = getIntent().getStringExtra("Apellido2");
         ced = getIntent().getStringExtra("Cedula");
-        tipo = getIntent().getStringExtra("Tipo");
-        tel = getIntent().getStringExtra("Telefono");
-        dir = getIntent().getStringExtra("Direccion");
-        ing = getIntent().getStringExtra("Ingreso");
-        monIngreso = getIntent().getStringExtra("Moneda");
-        con = getIntent().getStringExtra("Contra");
 
         final Toast msj = Toast.makeText(getApplicationContext(),"", Toast.LENGTH_SHORT);
 
@@ -72,21 +69,14 @@ public class Cuentas extends AppCompatActivity {
                     Conexion get = new Conexion();
                     get.execute(numCuenta.getText().toString());
 
-                    if(Objects.equals(tv2.getText(), "OK")) {
+                    if(est.equals("OK")) {
+
                         msj.setText("Cuenta a consultar correcta.");
                         msj.show();
                         Intent next = new Intent(Cuentas.this, Main2Activity.class);
                         next.putExtra("Nombre1",nom1);
-                        next.putExtra("Nombre2",nom2);
                         next.putExtra("Apellido1",ap1);
-                        next.putExtra("Apellido2",ap2);
                         next.putExtra("Cedula",ced);
-                        next.putExtra("Tipo",tipo);
-                        next.putExtra("Telefono",tel);
-                        next.putExtra("Direccion",dir);
-                        next.putExtra("Ingreso",ing);
-                        next.putExtra("Moneda",monIngreso);
-                        next.putExtra("Contra",con);
                         next.putExtra("Saldo",saldo);
                         next.putExtra("TipoCuenta",tipoCuenta);
                         next.putExtra("Coin",monCuenta);
@@ -191,13 +181,11 @@ public class Cuentas extends AppCompatActivity {
 
                         if(Objects.equals(idCuenta, numCuenta.getText().toString())){
                             if(Objects.equals(cedu, ced)){
-                                tv2.setText("OK");
+                                est = "OK";
                                 tipoCuenta = getValue("Tipo", element2);
                                 monCuenta = getValue("Moneda", element2);
                                 saldo = getValue("Saldo", element2);
                                 break;
-                            }else{
-                               tv2.setText("OTRA");
                             }
                         }
                     }
@@ -217,6 +205,7 @@ public class Cuentas extends AppCompatActivity {
 
 
     @Override
+    //Este método sirve para devolver valores a otro activity con el botón BACK del dispositivo.
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             Intent next = new Intent(Cuentas.this, MainActivity.class);
